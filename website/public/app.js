@@ -1,4 +1,5 @@
 import { firebaseConfig } from "./firebase-config.js";
+import { mountTour } from "./tour.js";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -10,6 +11,8 @@ const CMDS = {
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("show"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2400); }
+
+mountTour(document.querySelector("#tour"));
 
 // ------------------------------------------------------------- nav
 const nav = $("#nav");
