@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# mnemo: start and manage your Mnemo.  Run `mnemo help` for commands.
+set -euo pipefail
+SRC="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "$0")")/.." && pwd)"
+PY="$SRC/.venv/bin/python"
+cmd="${1:-start}"; shift || true
+
+# macOS: files downloaded with a web browser carry a "quarantine" flag that makes Gatekeeper call
+# unsigned apps "damaged". Clear it from Mnemo's own folder and make sure Electron is signed (ad-hoc).
+mac_unquarantine() {
+  [ "$(uname)" = Darwin ] || return 0
+  xattr -dr com.apple.quarantine "$1" 2>/dev/null || true
+  local e="$1/app/node_modules/electron/dist/Electron.app"
+  if [ -d "$e" ] && ! codesign -v "$e" 2>/dev/null; then codesign --force --deep --sign - "$e" >/dev/null 2>&1 || true; fi
+}
+
+case "$cmd" in
+  start|open|"")
+    mac_unquarantine "$SRC"
+    cd "$SRC/app"
+    # Linux: Electron's sandbox helper must be owned by root; if it isn't, run without it rather than crash.
+    sb="node_modules/electron/dist/chrome-sandbox"; extra=()
+    if [ "$(uname)" = Linux ] && [ -f "$sb" ] && [ "$(stat -c %u "$sb")" != 0 ]; then extra=(--no-sandbox); fi
+    exec npx --no-install electron . "${extra[@]}" ;;
+  headless|server) cd "$SRC" && echo "Mnemo is learning without the window (Ctrl+C to stop)…" && exec "$PY" -m mnemo.server --port "${1:-8765}" ;;
+  config)          cd "$SRC" && exec "$PY" -m mnemo.cli config "$@" ;;
+  update)          cd "$SRC" && git pull --ff-only && ./build.sh && echo "Mnemo is up to date." ;;
+  app)             cd "$SRC" && ./package-app.sh --install ;;
+  data)            d="${MNEMO_HOME:-$HOME/.mnemo}"; (open "$d" || xdg-open "$d") 2>/dev/null || echo "$d" ;;
+  bench|benchmark) cd "$SRC" && exec "$PY" scripts/benchmark.py "$@" ;;
+  doctor)          cd "$SRC" && exec "$PY" -m mnemo.cli doctor ;;
+  uninstall)
+    read -r -p "Remove the Mnemo program? Your learned data in ~/.mnemo is kept. [y/N] " a
+    [ "$a" = y ] && rm -rf "$SRC" "$HOME/.local/bin/mnemo" && echo "Removed. Delete ~/.mnemo too if you want a clean slate." ;;
+  help|-h|--help)
+    cat <<'H'
+mnemo                 open Mnemo
+mnemo headless        learn in the background without a window
+mnemo config          show settings      ·  mnemo config start_params=125000000 context_length=32768
+mnemo update          get the latest version
+mnemo app             build a Mnemo.app in /Applications on this Mac (built locally, so macOS opens it)
+mnemo doctor          check Python, GPU, Node and disk
+mnemo bench [stages]  speed test
+mnemo data            open the data folder
+mnemo uninstall       remove the program (keeps ~/.mnemo)
+H
+    ;;
+  *) echo "Unknown command: $cmd (try: mnemo help)"; exit 1 ;;
+esac

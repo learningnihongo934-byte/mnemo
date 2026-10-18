@@ -1,0 +1,8 @@
+.venv/
+app/node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+dist/
+app/build-config.json

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mnemo · Raise an AI from nothing</title>
+  <meta name="description" content="Mnemo trains a brand-new language model on your own computer. Pick its size and memory, then watch it learn from nothing. Free to use, by Virat Kaukuntla.">
+  <meta property="og:title" content="Mnemo · Raise an AI from nothing">
+  <meta property="og:description" content="Zero pretrained weights. It reads, it grows, it learns to talk.">
+  <meta property="og:image" content="https://mnemo.web.app/icon.png">
+  <meta name="theme-color" content="#0c0c0a">
+  <link rel="icon" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="net" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="logo" href="#top"><img src="icon.png" alt="">mnemo</a>
+  <nav class="links">
+    <a href="#grow">How it grows</a><a href="#features">Features</a><a href="#studio">Studio</a><a href="#plugins">Plugins</a><a href="#faq">FAQ</a>
+    <a href="https://github.com/learningnihongo934-byte/mnemo" target="_blank" rel="noopener">GitHub ↗</a>
+  </nav>
+  <div class="auth" id="auth"><button class="pill-btn" id="signin">Sign in</button></div>
+</header>
+
+<main id="top">
+  <!-- ======================= HERO ======================= -->
+  <section class="hero">
+    <div class="ticker mono" aria-live="off"><span class="dot"></span>parameters <b id="param-count">12,041,216</b></div>
+    <h1 class="display">
+      <span class="line"><span>Raise an AI</span></span>
+      <span class="line"><span>from <em>nothing.</em></span></span>
+    </h1>
+    <p class="lead reveal">Mnemo grows a brand-new language model on your own computer. No borrowed brains, no cloud.
+      You choose how big it starts and how much it can remember. It reads, it grows, it learns to talk.</p>
+
+    <div class="installer reveal" id="installer">
+      <div class="os-tabs" role="tablist">
+        <button data-os="unix" role="tab">macOS / Linux</button>
+        <button data-os="win" role="tab">Windows</button>
+      </div>
+      <div class="cmd-row">
+        <span class="prompt mono" id="prompt">$</span>
+        <code class="mono" id="cmd"></code>
+        <button class="copy" id="copy" aria-label="Copy install command"><span>Copy</span></button>
+      </div>
+      <p class="hint" id="os-hint">Paste into Terminal. Takes a few minutes. Then type <code>mnemo</code>.</p>
+    </div>
+    <div class="scroll-cue mono reveal">scroll to watch it grow ↓</div>
+  </section>
+
+  <!-- ======================= GROW STORY ======================= -->
+  <section class="grow" id="grow">
+    <div class="grow-sticky">
+      <div class="term">
+        <div class="term-top"><i></i><i></i><i></i><span class="mono" id="t-title">mnemo · day 0</span></div>
+        <div class="term-stats mono">
+          <div><span>params</span><b id="t-params">12M</b></div>
+          <div><span>loss</span><b id="t-loss">10.37</b></div>
+          <div><span>read</span><b id="t-read">0 tokens</b></div>
+        </div>
+        <svg class="spark" viewBox="0 0 300 70" preserveAspectRatio="none"><path id="t-curve" d=""/></svg>
+        <div class="term-out mono" id="t-out"></div>
+      </div>
+    </div>
+    <div class="chapters">
+      <article class="chapter" data-ch="0">
+        <span class="kicker mono">00 · birth</span>
+        <h2>It knows <em>nothing.</em></h2>
+        <p>Random weights. No vocabulary. Mnemo builds its own tokenizer from the first text it reads, then starts guessing
+          the next word, badly.</p>
+      </article>
+      <article class="chapter" data-ch="1">
+        <span class="kicker mono">01 · first words</span>
+        <h2>Shapes of <em>language.</em></h2>
+        <p>After a few minutes of reading, the gibberish gets punctuation, real words, the rhythm of sentences.</p>
+      </article>
+      <article class="chapter" data-ch="2">
+        <span class="kicker mono">02 · conversation course</span>
+        <h2>It learns to <em>talk.</em></h2>
+        <p>One click runs thousands of everyday conversations. Eight minutes later it says hi back, tells jokes,
+          and knows its own name.</p>
+      </article>
+      <article class="chapter" data-ch="3">
+        <span class="kicker mono">03 · it grows</span>
+        <h2>Then it gets <em>bigger.</em></h2>
+        <p>When it has learned enough for its size, Mnemo grows wider and deeper without forgetting anything:
+          12M → 99M → 545M → 1B+, as far as your RAM allows.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ======================= MODES MARQUEE ======================= -->
+  <section class="marquee" aria-label="Learning modes">
+    <div class="track" id="track">
+      <span>🌐 General</span><span>💻 Code</span><span>📚 Literature</span><span>🔬 Science</span><span>➗ Math</span>
+      <span>📰 News</span><span>💬 Conversation</span><span>✨ Your own mode</span>
+    </div>
+  </section>
+
+  <!-- ======================= FEATURES ======================= -->
+  <section class="features" id="features">
+    <h2 class="section-title reveal">Everything a growing<br>mind <em>needs.</em></h2>
+    <div class="bento">
+      <div class="card big reveal" data-spot>
+        <span class="kicker mono">design</span>
+        <h3>You pick the brain.</h3>
+        <p>Starting size, growth ceiling, context up to 128K tokens, training window, focus. A setup wizard shows memory
+          use and learning time before it's born.</p>
+        <div class="sliders" aria-hidden="true">
+          <div><span>size</span><i style="--v:.35"></i></div><div><span>context</span><i style="--v:.8"></i></div><div><span>window</span><i style="--v:.5"></i></div>
+        </div>
+      </div>
+      <div class="card reveal" data-spot><span class="kicker mono">web</span><h3>Reads the internet</h3>
+        <p><code>/learn coding</code> finds the best pages and studies them. It respects robots.txt and stays polite.</p></div>
+      <div class="card reveal" data-spot><span class="kicker mono">browser</span><h3>Drives its own browser</h3>
+        <p>Click, type, scroll. Every action becomes training data, so it slowly learns to browse.</p></div>
+      <div class="card reveal" data-spot><span class="kicker mono">memory</span><h3>Never forgets</h3>
+        <p>Everything it reads is searchable and pulled into context when you chat. Remove anything anytime.</p></div>
+      <div class="card reveal" data-spot><span class="kicker mono">files</span><h3>Learns your stuff</h3>
+        <p>Drop in PDFs, Word docs, ebooks, whole code folders. It remembers and trains on them.</p></div>
+      <div class="card wide reveal" data-spot><span class="kicker mono">private</span><h3>Lives on your machine.</h3>
+        <p>The model, memory, chats and files stay in <code>~/.mnemo</code>. Runs on Apple Silicon, NVIDIA GPUs, or plain CPU.</p>
+        <div class="platforms mono"><span>macOS</span><span>Windows</span><span>Linux</span></div></div>
+    </div>
+  </section>
+
+  <!-- ======================= STUDIO ======================= -->
+  <section class="studio" id="studio">
+    <div class="studio-head reveal">
+      <span class="kicker mono">studio</span>
+      <h2 class="section-title">Images, video and 3D.<br><em>On your hardware.</em></h2>
+      <p class="muted">Download open generative models from a curated catalog and run them locally. Every model shows its
+        license up front, so your team knows what's cleared for commercial work.</p>
+    </div>
+    <div class="studio-rows">
+      <div class="srow reveal"><span class="mono">image</span><div><b>Segmind SSD-1B</b><small>1024px · Apache-2.0 · commercial</small></div><div><b>DreamShaper 8</b><small>OpenRAIL-M · commercial</small></div><div><b>SDXL Turbo</b><small>1–4 steps · research only</small></div></div>
+      <div class="srow reveal"><span class="mono">video</span><div><b>Wan 2.1 1.3B</b><small>480p · Apache-2.0 · commercial</small></div><div><b>CogVideoX 2B</b><small>720×480 · Apache-2.0</small></div><div><b>ModelScope T2V</b><small>8 GB GPUs · research only</small></div></div>
+      <div class="srow reveal"><span class="mono">3d</span><div><b>Shap-E</b><small>text → .glb / .obj / .ply · MIT</small></div><div class="soon"><b>More soon</b><small>image → 3D, textures</small></div></div>
+    </div>
+  </section>
+
+  <!-- ======================= HARDWARE ======================= -->
+  <section class="hardware" id="hardware">
+    <h2 class="section-title reveal">Tuned for <em>your</em> machine.</h2>
+    <div class="hw-grid">
+      <div class="hw reveal" data-spot><b>NVIDIA</b><span>Any CUDA GPU. Pick the card, budget against its VRAM, multi-GPU boxes supported.</span></div>
+      <div class="hw reveal" data-spot><b>Apple Silicon</b><span>Metal acceleration on M1 through M5, unified memory used efficiently.</span></div>
+      <div class="hw reveal" data-spot><b>CPU</b><span>No GPU? Choose thread count and a small model; it still learns.</span></div>
+      <div class="hw reveal" data-spot><b>Every knob</b><span>Width, layers, context to 128K, precision, optimizer, batch, learning rate, memory cap.</span></div>
+    </div>
+  </section>
+
+  <!-- ======================= PLUGINS ======================= -->
+  <section class="plugins" id="plugins">
+    <div class="reveal">
+      <span class="kicker mono">plugins</span>
+      <h2 class="section-title">Teach it new<br><em>tricks.</em></h2>
+      <p class="muted">A few lines of Python in <code>~/.mnemo/plugins/</code> become a slash command. Ships with
+        <code>/wiki</code>, <code>/define</code>, <code>/calc</code>, <code>/time</code> and <code>/remember</code>.</p>
+    </div>
+    <pre class="code mono reveal" id="code"></pre>
+  </section>
+
+  <!-- ======================= FAQ ======================= -->
+  <section class="faq" id="faq">
+    <h2 class="section-title reveal">Honest <em>answers.</em></h2>
+    <details class="reveal"><summary>How smart will it get?</summary><div><p>It starts out writing gibberish. After the conversation course it handles small
+      talk. With days of reading it writes real sentences about what it studied. It won't match ChatGPT or Claude, which train
+      on thousands of GPUs. Mnemo is about owning and watching the whole thing.</p></div></details>
+    <details class="reveal"><summary>Why a command instead of a download?</summary><div><p>Downloaded apps need a paid Apple certificate, or macOS
+      calls them "damaged". The installer builds Mnemo on your own computer, so it just works.</p></div></details>
+    <details class="reveal"><summary>What do I need?</summary><div><p>Mac with Apple chip (8 GB works, 16 GB+ is better), Windows 10/11, or Linux.
+      An NVIDIA GPU makes it much faster. Keep 5–20 GB free for its reading library.</p></div></details>
+    <details class="reveal"><summary>Why do I need an account?</summary><div><p>It keeps Mnemo yours across updates and is how future
+      features (sharing models, cloud training) will work. Your model and data still never leave your computer.</p></div></details>
+    <details class="reveal"><summary>Is it free?</summary><div><p>Yes, free to use. The source is public so you can see exactly what runs on your machine, but it may not be redistributed or sold. Pro extras may come later. Sign in and join the waitlist.</p></div></details>
+  </section>
+
+  <!-- ======================= CTA ======================= -->
+  <section class="cta">
+    <h2 class="display small reveal">Give it a <em>first thought</em><br>tonight.</h2>
+    <div class="cta-row reveal">
+      <button class="big-btn" id="cta-install">Copy install command</button>
+      <button class="ghost-btn" id="waitlist">Join the Pro waitlist</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="made">Made by <b>Virat Kaukuntla</b></div>
+  <div class="foot mono"><a href="https://github.com/learningnihongo934-byte/mnemo" target="_blank" rel="noopener">github</a><a href="#faq">faq</a><span>© 2026 Virat Kaukuntla · All rights reserved</span></div>
+</footer>
+<div class="toast" id="toast"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

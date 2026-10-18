@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src ws://127.0.0.1:*; img-src 'self' data: http://127.0.0.1:*; media-src http://127.0.0.1:*">
+  <title>Mnemo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ SIDEBAR: chats + navigation ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="side-top drag">
+      <button class="ibtn nodrag" id="collapse" title="Hide sidebar (⌘\)"><i data-i="sidebar"></i></button>
+    </div>
+    <div class="brand"><img src="../build/icon-1024.png" alt=""><span id="brand-name">Mnemo</span></div>
+    <button class="nav new" id="new-chat" title="New chat (⌘N)"><i data-i="plus"></i><span>New chat</span></button>
+    <nav class="navs">
+      <button class="nav" data-view="learn" title="⌘2"><i data-i="spark"></i><span>Learn</span></button>
+      <button class="nav" data-view="studio" title="⌘5"><i data-i="image"></i><span>Studio</span></button>
+      <button class="nav" data-view="memory" title="⌘3"><i data-i="db"></i><span>Memory</span></button>
+      <button class="nav" data-view="settings" title="⌘4"><i data-i="gear"></i><span>Settings</span></button>
+    </nav>
+    <div class="side-label">Recents</div>
+    <input class="chat-search" id="chat-search" placeholder="Search chats…">
+    <div class="recents" id="recents"></div>
+    <button class="brain-card" id="brain-card" title="Open Learn">
+      <span class="dot" id="brain-dot"></span>
+      <span class="brain-text"><b id="brain-size">Starting…</b><small id="brain-state">waking up the brain</small></span>
+    </button>
+  </aside>
+  <div class="divider" id="div-left" title="Drag to resize"></div>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main" id="main">
+    <header class="topbar drag">
+      <button class="ibtn nodrag hidden" id="expand" title="Show sidebar (⌘\)"><i data-i="sidebar"></i></button>
+      <div class="title" id="title" title="Double-click to rename">New chat</div>
+      <button class="ibtn nodrag" id="export-chat" title="Export chat as Markdown"><i data-i="down"></i></button>
+      <div class="grow"></div>
+      <div class="nodrag mode-wrap">
+        <button class="chipbtn" id="mode-btn" title="Learning mode"></button>
+        <div class="menu hidden" id="mode-menu"></div>
+      </div>
+      <button class="ibtn nodrag" id="toggle-browser" title="Show/hide browser (⌘B)"><i data-i="globe"></i></button>
+    </header>
+
+    <!-- Chat -->
+    <section class="view chat active" id="view-chat">
+      <div class="scroller" id="scroller">
+        <div class="hero" id="hero">
+          <img src="../build/icon-1024.png" alt="">
+          <h1 id="hero-title">Good evening</h1>
+          <p id="hero-sub">I started from nothing and learn from everything I read.</p>
+        </div>
+        <div class="thread" id="thread"></div>
+      </div>
+      <div class="composer-wrap">
+        <div class="slash hidden" id="slash"></div>
+        <form class="composer" id="composer">
+          <div class="attachments hidden" id="attachments"></div>
+          <textarea id="input" rows="1" placeholder="Message Mnemo, or type / for commands"></textarea>
+          <div class="composer-row">
+            <button type="button" class="ibtn" id="attach" title="Attach files (or drop them anywhere here)"><i data-i="plus"></i></button>
+            <button type="button" class="ibtn" id="attach-folder" title="Teach a whole folder"><i data-i="folder"></i></button>
+            <div class="grow"></div>
+            <span class="composer-meta" id="composer-meta"></span>
+            <button type="submit" class="send" id="send" title="Send (Enter)"><i data-i="up"></i></button>
+          </div>
+        </form>
+        <div class="suggestions" id="suggestions">
+          <button class="chip">/learn coding</button>
+          <button class="chip">Teach me to talk</button>
+          <button class="chip">hi! how are you?</button>
+          <button class="chip">explore</button>
+          <button class="chip">/help</button>
+        </div>
+        <div class="disclaimer" id="disclaimer">Mnemo is a small model learning from scratch. It can be wrong or make no sense.</div>
+      </div>
+      <div class="drop hidden" id="drop"><div><i data-i="folder"></i><b>Drop files or folders</b><span>Mnemo will read and learn from them</span></div></div>
+    </section>
+
+    <!-- Learn -->
+    <section class="view" id="view-learn"><div class="page">
+      <h2>Learn</h2>
+      <div class="card talk-card">
+        <div class="card-head"><div><h3>Teach basic conversation</h3>
+          <p class="muted">Practice thousands of everyday conversations (greetings, small talk, feelings, names, thanks,
+            simple questions) so Mnemo can actually talk. Works from a blank brain.</p></div></div>
+        <div class="row">
+          <select id="basics-min"><option value="5">Quick · 5 min</option><option value="15" selected>Good · 15 min</option>
+            <option value="30">Better · 30 min</option><option value="60">Best · 60 min</option></select>
+          <button class="btn primary" id="basics-go">Start practice</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Learn a topic</h3>
+        <div class="row">
+          <input id="topic" placeholder="e.g. coding, black holes, Shakespeare, calculus…">
+          <button class="btn primary" id="topic-go">Learn</button>
+        </div>
+        <p class="muted">Searches Wikipedia, Stack Exchange, arXiv, Hacker News and more, then reads the best pages.
+          Same as <code>/learn coding</code> in chat.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Brain</h3><button id="train-toggle" class="btn">Pause</button></div>
+        <div class="grid stats">
+          <div><label>Parameters</label><b id="s-params">–</b></div>
+          <div><label>Stage</label><b id="s-stage">–</b></div>
+          <div><label>Can grow to here</label><b id="s-max">–</b></div>
+          <div><label>Tokens read</label><b id="s-tokens">–</b></div>
+          <div><label>Loss (lower = smarter)</label><b id="s-loss">–</b></div>
+          <div><label>Speed</label><b id="s-speed">–</b></div>
+          <div><label>Shape</label><b id="s-shape">–</b></div>
+          <div><label>Context</label><b id="s-context">–</b></div>
+          <div><label>Precision</label><b id="s-prec">–</b></div>
+        </div>
+        <label class="sub">Progress to next growth</label>
+        <div class="bar"><div id="grow-bar"></div></div>
+        <canvas id="chart" height="130"></canvas>
+        <label class="sub">What Mnemo writes right now</label>
+        <div class="sample" id="sample">(a sample appears after the first training steps)</div>
+        <div class="status-line" id="s-state"></div>
+        <div class="status-line" id="s-topics"></div>
+      </div>
+
+      <div class="card">
+        <div class="mode-banner" id="mode-banner"></div>
+        <h3>Library <span class="muted">(read first)</span></h3>
+        <p class="muted">Clean, openly available text from Hugging Face, chosen for the active mode (plus some Wikipedia and
+          conversations in every mode).</p>
+        <div class="row">
+          <select id="preset">
+            <option value="starter">Starter (~1–1.5 GB)</option>
+            <option value="standard">Standard (~4–5 GB)</option>
+            <option value="large">Large (~14 GB)</option>
+          </select>
+          <button class="btn" id="lib-check">Check size</button>
+        </div>
+        <div id="lib-plan"></div>
+        <div class="bar thin hidden" id="lib-bar-wrap"><div id="lib-bar"></div></div>
+        <div class="status-line" id="lib-status"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>The web</h3><button class="btn" id="explore-btn">Start exploring</button></div>
+        <div class="row">
+          <input id="site-url" placeholder="Learn a specific website, e.g. docs.python.org">
+          <input id="site-pages" type="number" value="100" min="1" max="10000" class="small" title="max pages">
+          <button class="btn" id="site-btn">Learn site</button>
+        </div>
+        <div id="jobs"></div>
+        <label class="sub">Recently read</label>
+        <div class="feed" id="feed"><p class="muted">Nothing yet.</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Your files</h3>
+          <div class="row tight"><button class="btn" id="up-files">Add files</button><button class="btn" id="up-folder">Add folder</button></div></div>
+        <p class="muted">Text, Markdown, code, PDF, Word, EPUB, HTML, CSV, JSON, notebooks… Code files are tagged as Code.</p>
+        <div class="status-line" id="up-status"></div>
+      </div>
+    </div></section>
+
+    <!-- Studio -->
+    <section class="view" id="view-studio"><div class="page wide">
+      <div class="page-head"><h2>Studio</h2><div class="seg" id="st-kinds"><button data-k="image" class="active">Image</button><button data-k="video">Video</button><button data-k="3d">3D</button></div></div>
+      <p class="muted">Open generative models that run entirely on this computer. Nothing is uploaded. Check each model's license before commercial use.</p>
+      <div class="card notice hidden" id="st-deps"><div><b>Install creative tools</b><p class="muted">Adds the libraries Studio needs (about 1 GB, one time).</p></div>
+        <button class="btn primary" id="st-install">Install</button></div>
+      <div class="studio-grid">
+        <div class="card create-card">
+          <label class="sub">Model</label><select id="st-model"></select>
+          <label class="sub">Describe it</label><textarea id="st-prompt" rows="3" placeholder="A lighthouse on a cliff at sunset, oil painting"></textarea>
+          <details class="adv"><summary>Advanced</summary>
+            <label class="sub">Avoid</label><input id="st-neg" class="text full" placeholder="blurry, low quality, text">
+            <div class="grid2">
+              <label>Steps<input id="st-steps" type="number" min="1" max="150"></label>
+              <label>Guidance<input id="st-guid" type="number" step="0.5" min="0" max="30"></label>
+              <label class="wh">Width<input id="st-w" type="number" step="64" min="128" max="2048"></label>
+              <label class="wh">Height<input id="st-h" type="number" step="64" min="128" max="2048"></label>
+              <label class="fr">Frames<input id="st-frames" type="number" min="8" max="121"></label>
+              <label>Seed<input id="st-seed" type="number" placeholder="random"></label>
+            </div>
+          </details>
+          <button class="btn primary wide" id="st-go">Generate</button>
+          <div class="bar thin hidden" id="st-bar-wrap"><div id="st-bar"></div></div>
+          <div class="status-line" id="st-status"></div>
+        </div>
+        <div class="models" id="st-models"></div>
+      </div>
+      <h3 class="gallery-title">Creations</h3>
+      <div class="gallery" id="st-gallery"><p class="muted">Nothing yet.</p></div>
+    </div></section>
+
+    <!-- Memory -->
+    <section class="view" id="view-memory"><div class="page">
+      <h2>Memory <span class="muted" id="mem-stats"></span></h2>
+      <p class="muted">Everything Mnemo reads is kept here with no size limit. When you chat, the most relevant pieces
+        are placed in its context window (up to 100k tokens).</p>
+      <div class="row search"><input id="mem-q" placeholder="Search memory…"><button class="btn" id="mem-go">Search</button></div>
+      <div id="mem-results" class="feed tall"></div>
+    </div></section>
+
+    <!-- Settings -->
+    <section class="view" id="view-settings"><div class="page">
+      <h2>Settings</h2>
+      <div class="card">
+        <h3>Appearance</h3>
+        <div class="field"><span>Theme</span>
+          <div class="seg" id="theme-seg"><button data-v="dark">Dark</button><button data-v="light">Light</button><button data-v="system">System</button></div></div>
+        <div class="field"><span>Accent color</span><div class="swatches" id="swatches"></div></div>
+        <div class="field"><span>Text size</span><input type="range" id="ui-font" min="12" max="18" step="1"></div>
+        <div class="field"><span>Chat width</span><input type="range" id="ui-thread" min="560" max="1100" step="20"></div>
+        <div class="field"><span>Assistant name</span><input id="ui-name" class="text" maxlength="24" placeholder="Mnemo"></div>
+        <label class="check"><input type="checkbox" id="ui-compact"> Compact messages</label>
+        <label class="check"><input type="checkbox" id="ui-notify"> Notifications (growth, finished reading)</label>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Custom modes</h3><button class="btn small" id="cm-new">＋ New mode</button></div>
+        <p class="muted">Your own learning mode: Mnemo explores your sites, favours your keywords, and tags what it learns.</p>
+        <div id="cm-list"></div>
+        <div id="cm-form" class="hidden form">
+          <div class="row"><input id="cm-icon" class="emoji" maxlength="4" placeholder="🎮"><input id="cm-name" placeholder="Name, e.g. Game dev"></div>
+          <input id="cm-blurb" class="text full" placeholder="What it's about">
+          <textarea id="cm-seeds" rows="3" placeholder="Start pages (one per line), e.g. create.roblox.com/docs"></textarea>
+          <textarea id="cm-domains" rows="2" placeholder="Favourite sites (one per line), e.g. devforum.roblox.com"></textarea>
+          <textarea id="cm-keywords" rows="2" placeholder="Keywords (one per line), e.g. luau, scripting"></textarea>
+          <div class="field"><span>Reply creativity</span><input type="range" id="cm-temp" min="0.1" max="1.2" step="0.05" value="0.7"></div>
+          <div class="row"><button class="btn primary" id="cm-save">Save mode</button><button class="btn" id="cm-cancel">Cancel</button></div>
+        </div>
+      </div>
+
+      <div class="card" id="settings-form">
+        <h3>Hardware &amp; architecture</h3>
+        <p class="muted" id="hw-info">Leave anything on Automatic and Mnemo picks the best value for this computer.</p>
+        <label>Train on <select data-k="device" data-str id="hw-device"><option value="auto">Automatic</option></select></label>
+        <label>Precision <select data-k="precision" data-str><option value="auto">Automatic</option><option value="fp32">fp32 (most accurate)</option><option value="bf16">bf16 (half the memory)</option></select></label>
+        <label>Optimizer <select data-k="optimizer" data-str><option value="auto">Automatic</option><option value="adamw">AdamW</option><option value="lion">Lion (low memory)</option></select></label>
+        <label>Memory-saving mode <select data-k="grad_checkpoint" data-str><option value="auto">Automatic</option><option value="on">On (slower, less memory)</option><option value="off">Off</option></select></label>
+        <label>Exact width (0 = automatic, multiple of 64) <input data-k="custom_d_model" type="number" step="64" min="0" max="16384"></label>
+        <label>Exact layers (0 = automatic) <input data-k="custom_layers" type="number" min="0" max="200"></label>
+        <label>Batch size per step (0 = automatic) <input data-k="micro_batch" type="number" min="0" max="512"></label>
+        <label>Gradient accumulation (0 = automatic) <input data-k="grad_accum" type="number" min="0" max="512"></label>
+        <label>Learning rate (0 = automatic) <input data-k="learning_rate" type="number" step="0.00001" min="0" max="0.1"></label>
+        <label>CPU threads (0 = all) <input data-k="cpu_threads" type="number" min="0" max="256"></label>
+        <label>Memory cap for training in GB (0 = automatic) <input data-k="memory_budget_gb" type="number" min="0" max="2048"></label>
+        <label class="check"><input data-k="studio_keep_loaded" type="checkbox"> Keep Studio models loaded between creations (faster, uses memory)</label>
+        <p class="muted">Device, precision and shape apply after restarting Mnemo; shape applies to a new brain (Reset brain).</p>
+        <h3 class="gap">Brain &amp; learning</h3>
+        <label>Reply creativity (temperature, 0 = mode default) <input data-k="temperature" type="number" step="0.05" min="0" max="2"></label>
+        <label>Max reply length (tokens) <input data-k="max_reply_tokens" type="number" min="10" max="4000"></label>
+        <label class="check"><input data-k="use_memory" type="checkbox"> Use memory when replying</label>
+        <label>Memory snippets per reply <input data-k="memory_snippets" type="number" min="0" max="20"></label>
+        <label>Starting size (parameters, 0 = smallest) <input data-k="start_params" type="number" step="1000000" min="0"></label>
+        <label class="check"><input data-k="allow_growth" type="checkbox"> Grow bigger as it learns</label>
+        <label>Context length (tokens) <input data-k="context_length" type="number" step="1024" min="256" max="1000000"></label>
+        <label>Training window (tokens, 0 = automatic) <input data-k="train_seq_len" type="number" step="256" min="0"></label>
+        <p class="muted">Size and context apply to a new brain (Data → Reset brain). The training window applies on the next restart.</p>
+        <label>Grow after reading N tokens per parameter <input data-k="growth_tokens_per_param" type="number" min="1" max="100"></label>
+        <label>RAM share for training (0.3–0.85) <input data-k="memory_budget_frac" type="number" step="0.05" min="0.3" max="0.85"></label>
+        <label>Max parameters (0 = as big as RAM allows) <input data-k="max_params" type="number" step="100000000" min="0"></label>
+        <label class="check"><input data-k="auto_train" type="checkbox"> Train automatically when the app starts</label>
+        <label class="check"><input data-k="keep_awake" type="checkbox"> Keep the Mac awake while Mnemo is open</label>
+        <h3 class="gap">Exploring</h3>
+        <label class="check"><input data-k="auto_explore" type="checkbox"> Start exploring when the app opens</label>
+        <label>Pages per /learn topic <input data-k="learn_pages" type="number" min="5" max="1000"></label>
+        <label>Default pages per site <input data-k="crawl_max_pages" type="number" min="1"></label>
+        <label>Delay between requests to one site (sec) <input data-k="crawl_delay_sec" type="number" step="0.5" min="1"></label>
+        <label class="stack">Extra start pages for exploring (one per line)<textarea data-k="crawl_seeds" data-list rows="3"></textarea></label>
+        <label class="stack">Never visit (one site or word per line)<textarea data-k="crawl_blocklist" data-list rows="3"></textarea></label>
+        <button class="btn primary" id="save-settings">Save</button>
+        <span class="status-line" id="settings-status"></span>
+      </div>
+
+      <div class="card">
+        <h3>Data</h3>
+        <div class="acct" id="acct-row"></div>
+        <p class="muted" id="home-path"></p>
+        <div class="row"><button class="btn" id="open-data">Open data folder</button>
+          <button class="btn" id="redo-setup">Redesign my AI…</button>
+          <button class="btn danger" id="reset-brain">Reset brain…</button></div>
+        <p class="muted">Reset forgets the learned weights and starts again from random. Memory, downloads and files are kept.</p>
+        <p class="muted">Mnemo · made by <b>Virat Kaukuntla</b> · <code>mnemo update</code> gets new versions</p>
+        <p class="muted">Shortcuts: ⌘K chat · ⌘L address bar · ⌘N new chat · ⌘\ sidebar · ⌘B browser · ⌘2–4 pages · Esc stop · ↑ last message</p>
+      </div>
+    </div></section>
+  </main>
+  <div class="divider" id="div-right" title="Drag to resize"></div>
+
+  <!-- ============ BROWSER ============ -->
+  <section class="browser" id="browser">
+    <div class="toolbar drag">
+      <button class="ibtn nodrag" id="b-back" title="Back"><i data-i="left"></i></button>
+      <button class="ibtn nodrag" id="b-fwd" title="Forward"><i data-i="right"></i></button>
+      <button class="ibtn nodrag" id="b-reload" title="Reload"><i data-i="reload"></i></button>
+      <form id="b-form" class="nodrag"><input id="b-url" spellcheck="false" placeholder="Search or enter address (⌘L)"></form>
+      <button id="b-learn" class="learn nodrag" title="Save this page to Mnemo's memory and training data"><i data-i="plus"></i>Learn page</button>
+    </div>
+    <div class="agent-bar hidden" id="agent-bar"></div>
+    <div id="browser-slot"></div>
+  </section>
+</div>
+<div class="overlay hidden" id="gate">
+  <div class="gate-card">
+    <img class="gate-logo" src="../build/icon-1024.png" alt="">
+    <h1 id="gate-title">Welcome to Mnemo</h1>
+    <p class="muted" id="gate-sub">Create a free account to start raising your AI.</p>
+    <button class="btn google" id="g-google"><svg viewBox="0 0 48 48" width="18" height="18"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continue with Google</button>
+    <div class="or"><span>or</span></div>
+    <form id="g-form">
+      <input id="g-name" placeholder="Your name" autocomplete="name">
+      <input id="g-email" type="email" placeholder="Email" autocomplete="email" required>
+      <input id="g-pass" type="password" placeholder="Password (6+ characters)" autocomplete="new-password" required minlength="6">
+      <button class="btn primary wide" id="g-submit">Create account</button>
+    </form>
+    <div class="gate-links"><a href="#" id="g-switch">Already have an account? Sign in</a><a href="#" id="g-forgot" class="hidden">Forgot password?</a></div>
+    <div class="gate-err" id="g-err"></div>
+    <p class="gate-wait hidden" id="g-wait">Finish signing in in your browser… <a href="#" id="g-cancel">Cancel</a></p>
+  </div>
+</div>
+
+<div class="overlay hidden" id="wizard">
+  <div class="gate-card wide-card">
+    <div class="steps" id="w-steps"><i class="on"></i><i></i><i></i><i></i></div>
+    <section class="wstep" data-s="0">
+      <h1>Design your AI</h1><p class="muted">How big is its brain on day one? You can change all of this later in Settings.</p>
+      <div class="presets" id="w-presets"></div>
+      <div class="wfield"><label>Starting size <b id="wv-start"></b></label><input type="range" id="w-start" min="0" max="7"></div>
+      <div class="wfield"><label class="rowl"><span>Grow bigger as it learns</span><input type="checkbox" id="w-growth" checked></label>
+        <label>Grow up to <b id="wv-max"></b></label><input type="range" id="w-max" min="0" max="12"></div>
+      <div class="estimate" id="w-est"></div>
+    </section>
+    <section class="wstep hidden" data-s="1">
+      <h1>How much can it remember?</h1><p class="muted">Context is how much text it can read at once. The training window is how much it studies per example.</p>
+      <div class="wfield"><label>Context length <b id="wv-ctx"></b></label><input type="range" id="w-ctx" min="0" max="7"></div>
+      <div class="wfield"><label>Training window <b id="wv-seq"></b></label><input type="range" id="w-seq" min="0" max="5"></div>
+      <div class="estimate">Longer windows teach long-range memory but train more slowly. <b>Automatic</b> is best for most people.</div>
+    </section>
+    <section class="wstep hidden" data-s="2">
+      <h1>What should it focus on?</h1><p class="muted">Its focus decides what it reads and studies most.</p>
+      <div class="mode-grid" id="w-modes"></div>
+      <div class="wfield"><label>Give it a name</label><input id="w-name" class="text" maxlength="24" placeholder="Mnemo"></div>
+    </section>
+    <section class="wstep hidden" data-s="3">
+      <h1>Its first lesson</h1><p class="muted">A brand-new brain knows nothing. Pick how it starts learning.</p>
+      <label class="choice"><input type="radio" name="w-first" value="talk" checked><span><b>💬 Learn to talk (15 min)</b><small>Practice everyday conversation so you can chat right away. Recommended.</small></span></label>
+      <label class="choice"><input type="radio" name="w-first" value="library"><span><b>📚 Read the starter library (~1.5 GB download)</b><small>Wikipedia and more for its chosen focus. Takes longer, learns much more.</small></span></label>
+      <label class="choice"><input type="radio" name="w-first" value="explore"><span><b>🌍 Explore the web</b><small>Start reading the internet on its own in its focus area.</small></span></label>
+      <label class="choice"><input type="radio" name="w-first" value="none"><span><b>Nothing yet</b><small>I'll decide later.</small></span></label>
+    </section>
+    <div class="wnav"><button class="btn" id="w-back">Back</button><div class="grow"></div><button class="btn primary" id="w-next">Next</button></div>
+  </div>
+</div>
+<div class="update-bar hidden" id="update-bar"></div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+<script src="studio.js"></script>
+</body>
+</html>

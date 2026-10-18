@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    // Each signed-in user can read and write only their own saved builds and profile.
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    // Waitlist for future paid plans: anyone signed in can add themselves, nobody can read the list from the site.
+    match /waitlist/{uid} {
+      allow create, update: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

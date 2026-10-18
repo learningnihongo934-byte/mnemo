@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Mnemo: a seed of light (memory) inside orbits of connected knowledge -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#241a4d"/>
+      <stop offset="0.55" stop-color="#120f24"/>
+      <stop offset="1" stop-color="#0a0a12"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#a48bff" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#7c5cff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="core" cx="0.38" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.25" stop-color="#d9ceff"/>
+      <stop offset="0.7" stop-color="#8d6bff"/>
+      <stop offset="1" stop-color="#5a3be0"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c4b3ff"/>
+      <stop offset="1" stop-color="#6a4cf0"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- macOS icon grid: 824px rounded square centred in 1024 -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#shine)"/>
+  <rect x="101.5" y="101.5" width="821" height="821" rx="184" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="3"/>
+
+  <circle cx="512" cy="512" r="330" fill="url(#glow)"/>
+
+  <!-- orbits -->
+  <g fill="none" stroke="url(#ring)" stroke-linecap="round">
+    <ellipse cx="512" cy="512" rx="270" ry="108" stroke-width="10" stroke-opacity="0.85" transform="rotate(-28 512 512)"/>
+    <ellipse cx="512" cy="512" rx="270" ry="108" stroke-width="10" stroke-opacity="0.6" transform="rotate(32 512 512)"/>
+    <circle cx="512" cy="512" r="200" stroke-width="5" stroke-opacity="0.35" stroke-dasharray="4 22"/>
+  </g>
+
+  <!-- knowledge nodes and their links to the core -->
+  <g stroke="#b9a6ff" stroke-opacity="0.45" stroke-width="5">
+    <line x1="512" y1="512" x2="276" y2="390"/>
+    <line x1="512" y1="512" x2="752" y2="636"/>
+    <line x1="512" y1="512" x2="300" y2="660"/>
+    <line x1="512" y1="512" x2="726" y2="368"/>
+    <line x1="276" y1="390" x2="300" y2="660"/>
+    <line x1="726" y1="368" x2="752" y2="636"/>
+  </g>
+  <g>
+    <circle cx="276" cy="390" r="30" fill="#7c5cff" filter="url(#soft)" opacity="0.8"/>
+    <circle cx="276" cy="390" r="22" fill="#cbbcff"/>
+    <circle cx="752" cy="636" r="30" fill="#7c5cff" filter="url(#soft)" opacity="0.8"/>
+    <circle cx="752" cy="636" r="22" fill="#cbbcff"/>
+    <circle cx="300" cy="660" r="16" fill="#9d85ff"/>
+    <circle cx="726" cy="368" r="16" fill="#9d85ff"/>
+    <circle cx="512" cy="292" r="10" fill="#e6deff" opacity="0.9"/>
+    <circle cx="512" cy="732" r="10" fill="#e6deff" opacity="0.9"/>
+  </g>
+
+  <!-- the core: Mnemo's memory -->
+  <circle cx="512" cy="512" r="118" fill="#7c5cff" filter="url(#soft)" opacity="0.9"/>
+  <circle cx="512" cy="512" r="104" fill="url(#core)"/>
+  <circle cx="512" cy="512" r="104" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <ellipse cx="478" cy="470" rx="38" ry="24" fill="#ffffff" opacity="0.55" transform="rotate(-30 478 470)"/>
+</svg>

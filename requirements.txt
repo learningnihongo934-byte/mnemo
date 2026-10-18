@@ -1,0 +1,12 @@
+torch>=2.5
+numpy
+tokenizers>=0.20
+pyarrow
+fastapi
+uvicorn[standard]
+httpx
+trafilatura
+lxml
+pytest
+pypdf
+python-multipart
