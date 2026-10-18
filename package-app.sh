@@ -12,6 +12,7 @@ printf '{"python": "%s"}\n' "$ROOT/.venv/bin/python" > app/build-config.json
 echo "==> Staging the brain"
 rm -rf dist/brain && mkdir -p dist/brain
 rsync -a --exclude '__pycache__' mnemo dist/brain/
+mkdir -p dist/brain/website/public && cp website/public/firebase-config.js dist/brain/website/public/   # accounts config
 
 echo "==> Packaging"
 ARCH=$(uname -m); [ "$ARCH" = "x86_64" ] && ARCH=x64
