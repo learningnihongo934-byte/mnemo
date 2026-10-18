@@ -12,7 +12,7 @@ firebase login
 cd website && firebase hosting:sites:create mnemo && firebase deploy
 ```
 
-Your site is live at `https://mnemo.web.app`. The installer is also served at `https://<project-id>.web.app/install`.
+Your site is live at `https://mnemoai.web.app`. The installer is also served at `https://<project-id>.web.app/install`.
 After you add a custom domain, add it under Authentication → Settings → Authorized domains.
 
 6. The app reads the same `public/firebase-config.js`, so once it's filled in, sign-in works in the app too.

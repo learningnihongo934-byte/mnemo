@@ -66,7 +66,7 @@ DEFAULTS = {
     "crawl_max_pages": 500,             # per targeted-site crawl
     "crawl_seeds": [],                  # extra start pages, added to the active mode's own seeds
     "crawl_blocklist": [],
-    "user_agent": f"MnemoBot/{VERSION} (self-learning AI; respects robots.txt; https://mnemo.web.app)",
+    "user_agent": f"MnemoBot/{VERSION} (self-learning AI; respects robots.txt; https://mnemoai.web.app)",
     # Chat
     "temperature": 0,                   # 0 = use the active mode's own setting
     "max_reply_tokens": 300,

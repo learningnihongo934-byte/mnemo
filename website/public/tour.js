@@ -122,7 +122,7 @@ const SCENES = [
     sfx: [[.3, "pop"], [.9, "pop"], [1.5, "pop"], [2.1, "pop"]] },
 
   { d: 3, cap: "One command to install. macOS, Windows and Linux.",
-    html: () => `<div class="t-end"><img src="${ICON}" alt=""><h3>mnemo</h3><code>curl -fsSL …/install.sh | bash</code><p>Made by Virat Kaukuntla · mnemo.web.app</p></div>`,
+    html: () => `<div class="t-end"><img src="${ICON}" alt=""><h3>mnemo</h3><code>curl -fsSL …/install.sh | bash</code><p>Made by Virat Kaukuntla · mnemoai.web.app</p></div>`,
     render(t, el) { el.querySelector(".t-end").style.opacity = ease(t * 3); },
     sfx: [[.1, "chime"]] },
 ];
