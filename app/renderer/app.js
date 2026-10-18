@@ -402,7 +402,7 @@ async function drawChart() {
   }
   ctx.fillText(`loss ${max.toFixed(2)} → ${ys[ys.length - 1].toFixed(2)}  (green lines = grew)`, 10, H - 4);
 }
-setInterval(() => $('#tab-learn').classList.contains('active') && drawChart(), 15000);
+setInterval(() => view === 'learn' && drawChart(), 15000);
 
 async function learnTopic() {
   const topic = $('#topic').value.trim();
