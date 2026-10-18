@@ -14,7 +14,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 
-from . import account, basics, events, files, library, memory, modes, plugins, studio
+from . import account, basics, code_course, events, files, library, memory, modes, plugins, studio
+from .code_agent import CodeError, CodeSession, Workspace
 from .agent import Agent
 from .browser import BrowserBridge
 from .config import CHATS_PATH, HOME, ensure_dirs, load_settings, save_settings
@@ -56,6 +57,7 @@ def startup():
     state["crawler"] = Crawler()
     state["browser"] = BrowserBridge()
     state["agent"] = Agent(state["trainer"], state["crawler"], state["browser"])
+    state["code"] = CodeSession()
     state["library_stop"] = threading.Event()
     state["library_thread"] = None
     plugins.registry.load()
@@ -402,6 +404,65 @@ def hardware():
             "cpu_threads": os.cpu_count()}
 
 
+# ---------------------------------------------------------------- Mnemo Code
+async def _code_task(text: str, send):
+    cs = state["code"]
+    try:
+        if not await cs.direct(text, send):
+            if cs.running:
+                await send({"type": "code", "stage": "note", "text": "Mnemo Code is already working. Stop it first."})
+                return
+            await cs.task(state["agent"], text, send)
+    except CodeError as e:
+        await send({"type": "code", "stage": "end", "ok": False, "text": str(e)})
+
+
+@app.get("/api/code")
+def code_status():
+    cs = state["code"]
+    cfg = cs.cfg()
+    return {**cfg, "running": cs.running, "can_undo": bool(cs.undo_stack), "always": sorted(cs.always)}
+
+
+@app.post("/api/code/workspace")
+def code_workspace(body: dict):
+    try:
+        out = CodeSession.set_workspace(body.get("path", ""))
+    except CodeError as e:
+        raise HTTPException(400, str(e))
+    state["code"].always.clear()  # new folder, ask again
+    return out
+
+
+@app.get("/api/code/tree")
+def code_tree(path: str = "."):
+    try:
+        return state["code"].workspace().tree(path)
+    except (CodeError, OSError) as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/api/code/file")
+def code_file(path: str):
+    try:
+        p = state["code"].workspace().path(path)
+        if p.stat().st_size > 400_000:
+            return {"path": path, "text": "", "too_big": True}
+        return {"path": path, "text": p.read_text(errors="replace")}
+    except (CodeError, OSError) as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/code/undo")
+def code_undo():
+    return {"text": state["code"].undo(), "can_undo": bool(state["code"].undo_stack)}
+
+
+@app.post("/api/code/teach")
+async def code_teach(body: dict):
+    return await code_course.teach(state["trainer"], float(body.get("minutes", 20)))
+
+
 @app.get("/api/version")
 def version():
     """How many commits behind GitHub this copy is (0 if unknown or offline)."""
@@ -478,6 +539,14 @@ async def ws_ui(ws: WebSocket, token: str = ""):
                     state["agent"].handle(msg["text"], msg.get("history", []), send, msg.get("files")))
             elif msg.get("type") == "stop":
                 state["agent"].stop_flag.set()
+            elif msg.get("type") == "code_task":
+                asyncio.create_task(_code_task(msg.get("text", ""), send))
+            elif msg.get("type") == "code_approve":
+                state["code"].answer(msg.get("id", ""), bool(msg.get("ok")), bool(msg.get("always")), msg.get("tool", ""))
+            elif msg.get("type") == "code_stop":
+                state["code"].stop = True
+                for sid in list(state["code"].pending):
+                    state["code"].answer(sid, False)
     except WebSocketDisconnect:
         pass
     finally:

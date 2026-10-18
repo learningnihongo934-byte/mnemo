@@ -19,6 +19,7 @@
     <button class="nav new" id="new-chat" title="New chat (⌘N)"><i data-i="plus"></i><span>New chat</span></button>
     <nav class="navs">
       <button class="nav" data-view="learn" title="⌘2"><i data-i="spark"></i><span>Learn</span></button>
+      <button class="nav" data-view="code" title="⌘6"><i data-i="code"></i><span>Mnemo Code</span></button>
       <button class="nav" data-view="studio" title="⌘5"><i data-i="image"></i><span>Studio</span></button>
       <button class="nav" data-view="memory" title="⌘3"><i data-i="db"></i><span>Memory</span></button>
       <button class="nav" data-view="settings" title="⌘4"><i data-i="gear"></i><span>Settings</span></button>
@@ -165,6 +166,52 @@
       </div>
     </div></section>
 
+    <!-- Mnemo Code -->
+    <section class="view code-view" id="view-code">
+      <div class="code-bar">
+        <div class="ws-wrap">
+          <button class="chipbtn" id="ws-btn" title="Choose the folder Mnemo Code works in"><i data-i="folder"></i><span id="ws-name">Choose folder</span></button>
+          <div class="menu hidden" id="ws-menu"></div>
+        </div>
+        <div class="perm seg" id="perm" title="How much Mnemo Code may do on its own">
+          <button data-p="ask" title="Asks before every action, even reading">Ask</button>
+          <button data-p="partial" title="Reads freely, asks before changing files or running commands">Partial</button>
+          <button data-p="full" title="Does everything without asking (still locked to this folder)">Full access</button>
+        </div>
+        <div class="grow"></div>
+        <button class="ibtn" id="code-undo" title="Undo Mnemo Code's last task (⌘Z)" disabled><i data-i="undo"></i></button>
+        <button class="btn small" id="code-teach" title="Practice tool use so Mnemo gets better at coding tasks">Teach Mnemo Code</button>
+        <div class="ws-wrap">
+          <button class="ibtn" id="code-gear" title="Mnemo Code settings"><i data-i="gear"></i></button>
+          <div class="menu hidden code-settings" id="code-settings">
+            <label class="check"><input type="checkbox" data-c="code_allow_commands"> Allow running terminal commands</label>
+            <label class="check"><input type="checkbox" data-c="code_show_thinking"> Show thinking as it writes</label>
+            <label class="field"><span>Max steps per task</span><input type="number" data-c="code_max_steps" min="1" max="50"></label>
+            <label class="field"><span>Creativity</span><input type="range" data-c="code_temperature" min="0" max="1" step="0.05"></label>
+            <button class="btn small" id="code-forget">Forget “always allow” choices</button>
+            <p class="muted">Mnemo Code can only touch files inside the chosen folder. Every change is backed up so Undo works.</p>
+          </div>
+        </div>
+      </div>
+      <div class="code-body">
+        <aside class="ftree" id="ftree"><div class="empty">Choose a folder to see its files.</div></aside>
+        <div class="code-main">
+          <div class="viewer hidden" id="viewer">
+            <div class="viewer-head"><b id="viewer-name"></b><div class="grow"></div>
+              <button class="btn small" id="viewer-ask">Ask about this file</button><button class="ibtn" id="viewer-x"><i data-i="x"></i></button></div>
+            <pre class="viewer-code" id="viewer-code"></pre>
+          </div>
+          <div class="code-thread" id="code-thread"></div>
+          <form class="composer code-composer" id="code-form">
+            <textarea id="code-input" rows="1" placeholder="Tell Mnemo Code what to do… (or /read, /ls, /find, /run, /undo)"></textarea>
+            <div class="composer-row"><span class="composer-meta" id="code-meta"></span><div class="grow"></div>
+              <button type="submit" class="send" id="code-send"><i data-i="up"></i></button></div>
+          </form>
+          <div class="tipline" id="code-tip"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Studio -->
     <section class="view" id="view-studio"><div class="page wide">
       <div class="page-head"><h2>Studio</h2><div class="seg" id="st-kinds"><button data-k="image" class="active">Image</button><button data-k="video">Video</button><button data-k="3d">3D</button></div></div>
@@ -218,6 +265,7 @@
         <div class="field"><span>Assistant name</span><input id="ui-name" class="text" maxlength="24" placeholder="Mnemo"></div>
         <label class="check"><input type="checkbox" id="ui-compact"> Compact messages</label>
         <label class="check"><input type="checkbox" id="ui-notify"> Notifications (growth, finished reading)</label>
+        <label class="check"><input type="checkbox" id="ui-sounds"> Little sound effects</label>
       </div>
 
       <div class="card">
@@ -360,5 +408,7 @@
 <div class="toast" id="toast"></div>
 <script src="app.js"></script>
 <script src="studio.js"></script>
+<script src="code.js"></script>
+<script src="fun.js"></script>
 </body>
 </html>

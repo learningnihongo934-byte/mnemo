@@ -48,7 +48,15 @@ DEFAULTS = {
     "learning_rate": 0,
     "cpu_threads": 0,
     "memory_budget_gb": 0,              # hard memory cap for training (0 = share of RAM / GPU memory)
-    "studio_keep_loaded": False,        # keep the last Studio model in memory between creations
+    "studio_keep_loaded": False,
+    # Mnemo Code
+    "code_workspace": "",               # folder Mnemo Code works in
+    "code_recent": [],
+    "code_permission": "ask",           # ask (everything) · partial (asks before changes) · full (never asks)
+    "code_allow_commands": True,        # let it run terminal commands (always inside the workspace)
+    "code_max_steps": 10,
+    "code_show_thinking": True,
+    "code_temperature": 0.3,        # keep the last Studio model in memory between creations
     "growth_tokens_per_param": 10,      # grow once it has read this many tokens per parameter
     "memory_budget_frac": 0.6,          # share of system RAM training may use (sets the max size)
     "max_params": 0,                    # 0 = no cap besides memory

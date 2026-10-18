@@ -121,6 +121,21 @@ def register(mnemo):
 
 `ctx` gives you `trainer`, `crawler`, `browser`, `memory` and `settings`. Built in: `/wiki`, `/define`, `/calc`, `/time`, `/remember`.
 
+## Mnemo Code
+
+Mnemo's own model working on files in a folder you choose (sidebar → **Mnemo Code**). It thinks out loud, then
+reads, writes, edits, searches and runs commands, one step at a time, shown as cards with diffs.
+
+| Permission | What it does |
+|---|---|
+| **Ask** | approve every step, even reading |
+| **Partial** | reads freely, asks before changing files or running commands |
+| **Full access** | never asks |
+
+In every mode it is locked to the folder, refuses dangerous commands (`sudo`, `rm -rf /`, …), and backs up every change
+so **Undo** (⌘Z) always works. A model trained from scratch has to learn tool use: press **Teach Mnemo Code** to run
+the practice course. The direct commands `/ls`, `/read`, `/find`, `/run`, `/undo` work from day one.
+
 ## Studio (local image, video and 3D)
 
 Studio downloads open generative models and runs them on your machine: SSD-1B, DreamShaper 8, Stable Diffusion 1.5,

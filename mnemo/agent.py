@@ -27,7 +27,8 @@ HELP = """**Commands** (type / to see this list as you type)
 `/autopilot <goal>`: let my own model drive the browser
 `/image <prompt>` · `/video <prompt>` · `/3d <prompt>`: create with a local model from Studio
 `/status` · `/train` · `/pause`: brain status and training
-`/new`: start a new chat · `/help`: this list
+`/new`: start a new chat · `/tips`: tips & tricks · `/help`: this list
+**Mnemo Code** (sidebar): let me work on files in a folder, with Ask / Partial / Full access.
 📎 Attach or drop files/folders to teach me from them."""
 
 

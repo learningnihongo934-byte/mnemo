@@ -22,6 +22,8 @@ const P = {
   retry: '<path d="M4 12a8 8 0 0 1 14-5.3M20 4v5h-5M20 12a8 8 0 0 1-14 5.3M4 20v-5h5"/>',
   down: '<path d="M12 4v12M6 11l6 6 6-6M5 20h14"/>',
   image: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+  code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+  undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
   chevron: '<path d="M6 9l6 6 6-6"/>', tool: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
 };
 const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n] || ''}</svg>`;
@@ -51,7 +53,7 @@ function notify(text) {
 // ------------------------------------------------------------- appearance + layout
 const ACCENTS = ['#7c5cff', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6'];
 const UI_DEFAULTS = { theme: 'dark', accent: '#7c5cff', font: 14, sideW: 260, browserW: 560, threadW: 760, name: 'Mnemo',
-  compact: false, browser: true, sidebar: true, notify: true };
+  compact: false, browser: true, sidebar: true, notify: true, sounds: true };
 function lighten(hex, amt = 0.35) {
   const n = parseInt(hex.slice(1), 16); const c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v + (255 - v) * amt));
   return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
@@ -79,7 +81,7 @@ function applyUI() {
   $('#ui-accent').oninput = (e) => setUI({ accent: e.target.value }, false);
   $('#ui-accent').onchange = (e) => setUI({ accent: e.target.value });
   $('#ui-font').value = ui.font; $('#ui-thread').value = ui.threadW; $('#ui-name').value = ui.name;
-  $('#ui-compact').checked = !!ui.compact; $('#ui-notify').checked = !!ui.notify;
+  $('#ui-compact').checked = !!ui.compact; $('#ui-notify').checked = !!ui.notify; $('#ui-sounds').checked = ui.sounds !== false;
   requestAnimationFrame(sync);
 }
 let uiSave;
@@ -92,6 +94,7 @@ $('#ui-font').oninput = (e) => setUI({ font: Number(e.target.value) });
 $('#ui-thread').oninput = (e) => setUI({ threadW: Number(e.target.value) });
 $('#ui-name').oninput = (e) => setUI({ name: e.target.value.trim() || 'Mnemo' });
 $('#ui-compact').onchange = (e) => setUI({ compact: e.target.checked });
+$('#ui-sounds').onchange = (e) => setUI({ sounds: e.target.checked });
 $('#ui-notify').onchange = (e) => { setUI({ notify: e.target.checked }); if (e.target.checked) Notification.requestPermission?.(); };
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => ui.theme === 'system' && applyUI());
 $('#collapse').onclick = () => setUI({ sidebar: false });
@@ -124,6 +127,7 @@ function showView(v) {
   if (v === 'memory') loadRecent();
   if (v === 'settings') loadSettings();
   if (v === 'studio') loadStudio();
+  if (v === 'code') loadCode();
   if (v === 'chat') setTimeout(() => $('#input').focus(), 0);
 }
 $$('.nav[data-view]').forEach((b) => b.onclick = () => showView(b.dataset.view));
@@ -217,6 +221,7 @@ function renderAttachments() {
 }
 async function send(text) {
   text = text.trim();
+  if (window.fun && fun.intercept(text)) { $('#input').value = ''; return; }
   if (text === '/new' || text === '/clear') { newChat(); return; }
   if ((!text && !attachments.length) || !ws || ws.readyState !== 1) return;
   showView('chat');
@@ -337,7 +342,7 @@ document.addEventListener('keydown', (e) => {
   else if (mod && k === 'n') { e.preventDefault(); newChat(); }
   else if (mod && k === 'b') { e.preventDefault(); setUI({ browser: !ui.browser }); }
   else if (mod && e.key === '\\') { e.preventDefault(); setUI({ sidebar: !ui.sidebar }); }
-  else if (mod && ['1', '2', '3', '4', '5'].includes(e.key)) { e.preventDefault(); showView(['chat', 'learn', 'memory', 'settings', 'studio'][Number(e.key) - 1]); }
+  else if (mod && ['1', '2', '3', '4', '5', '6'].includes(e.key)) { e.preventDefault(); showView(['chat', 'learn', 'memory', 'settings', 'studio', 'code'][Number(e.key) - 1]); }
   else if (e.key === 'Escape' && busy) { ws.send(JSON.stringify({ type: 'stop' })); setBusy(false); }
 });
 
@@ -854,6 +859,7 @@ function connect(cfg) {
     else if (m.type === 'mode') onMode(m);
     else if (m.type === 'modes') loadModes();
     else if (m.type === 'studio') onStudio(m);
+    else if (m.type === 'code') onCode(m);
     else if (m.type === 'account') { account = { signed_in: true, configured: true, ...m }; afterSignIn(); }
     else if (m.type === 'model' && !m.quiet) { toast(m.text); notify(m.text); }
     else onChat(m);
