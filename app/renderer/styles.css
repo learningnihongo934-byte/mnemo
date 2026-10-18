@@ -421,3 +421,39 @@ kbd { font: 10px ui-monospace, monospace; opacity: .7; margin-left: 4px; }
 @keyframes dream { to { filter: hue-rotate(360deg); } }
 .tips-list { columns: 2; column-gap: 24px; font-size: 13px; color: var(--soft); padding-left: 18px; }
 .tips-list li { margin-bottom: 6px; break-inside: avoid; }
+
+/* ---------- live activity while answering ---------- */
+.activity { margin-left: 38px; font-size: 13px; color: var(--muted); }
+.activity summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.activity summary::-webkit-details-marker { display: none; }
+.activity summary::before { content: "›"; display: inline-block; transition: transform .2s; color: var(--muted); }
+.activity[open] summary::before { transform: rotate(90deg); }
+.activity summary small { color: var(--muted); font-variant-numeric: tabular-nums; }
+.activity summary > span:not(.shimmer) { color: var(--soft); }
+.activity ul { list-style: none; margin: 8px 0 2px; padding: 0 0 0 4px; border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); display: grid; gap: 6px; }
+.activity li { display: grid; grid-template-columns: 22px 1fr; align-items: start; padding-left: 8px; color: var(--soft); animation: actin .25s ease; }
+.activity li i { font-style: normal; }
+.activity li.now span { background: linear-gradient(90deg, var(--muted) 20%, var(--text) 50%, var(--muted) 80%); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 1.6s linear infinite; }
+.activity li.ok span::after { content: " ✓"; color: var(--good); }
+.act-items { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.act-items em { font-style: normal; font-size: 11.5px; border: 1px solid var(--line); border-radius: 99px; padding: 1px 8px; color: var(--muted); }
+@keyframes actin { from { opacity: 0; transform: translateY(-3px); } }
+
+/* ---------- starting tutorial ---------- */
+#tour-hole { position: fixed; z-index: 300; border-radius: 12px; pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.62), 0 0 0 2px var(--accent), 0 0 24px 4px color-mix(in srgb, var(--accent) 45%, transparent);
+  transition: left .35s cubic-bezier(.2,.8,.2,1), top .35s cubic-bezier(.2,.8,.2,1), width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1); }
+#tour-card { position: fixed; z-index: 301; width: 320px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px;
+  box-shadow: var(--shadow); transition: left .35s cubic-bezier(.2,.8,.2,1), top .35s cubic-bezier(.2,.8,.2,1); animation: actin .3s ease; }
+#tour-card.center { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); width: 380px; text-align: center; }
+#tour-card h4 { margin: 6px 0 6px; font-size: 17px; }
+#tour-card p { margin: 0 0 14px; color: var(--soft); font-size: 13.5px; line-height: 1.55; }
+.tc-top { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); }
+.tc-top button { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 11.5px; }
+.tc-top button:hover { color: var(--text); }
+.tc-nav { display: flex; align-items: center; gap: 6px; }
+.tc-dots { flex: 1; display: flex; gap: 4px; }
+#tour-card.center .tc-dots { justify-content: flex-start; }
+.tc-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+.tc-dots i.on { background: var(--accent); width: 16px; border-radius: 9px; }

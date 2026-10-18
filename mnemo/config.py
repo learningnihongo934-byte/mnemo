@@ -25,7 +25,8 @@ VERSION = "0.1.0"
 DEFAULTS = {
     # Learning
     "mode": "general",                  # see modes.py: general, code, literature, science, math, news, conversation
-    "setup_done": False,                # first-run setup wizard finished
+    "setup_done": False,
+    "tutorial_done": False,             # starting tutorial seen                # first-run setup wizard finished
     "custom_modes": {},                 # your own modes: {id: {name, icon, blurb, seeds, domains, keywords, temperature}}
     "auto_explore": False,              # start exploring the web when the app opens
     "keep_awake": True,                 # stop the Mac from sleeping while Mnemo is open

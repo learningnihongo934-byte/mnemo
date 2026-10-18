@@ -271,7 +271,40 @@ main.addEventListener('drop', (e) => {
   showView('chat'); attachments.push(...paths); renderAttachments(); $('#input').focus();
 });
 
+// Live activity while Mnemo answers: real steps (memory, planning, thinking, writing) with a timer.
+let act = null;
+const STEP_ICON = { files: '📎', memory: '🧠', plan: '🗺️', think: '💭', write: '✍️' };
+function onStatus(m) {
+  if (m.step === 'done') {
+    if (!act) return;
+    clearInterval(act.timer);
+    const secs = ((performance.now() - act.t0) / 1000).toFixed(1);
+    act.el.querySelectorAll('li.now').forEach((li) => { li.classList.remove('now'); li.classList.add('ok'); });
+    act.el.querySelector('summary').innerHTML = `<span>Thought for ${secs}s</span><small>${m.memories ? ` · used ${m.memories} memor${m.memories === 1 ? 'y' : 'ies'}` : ''}${m.tokens ? ` · ${m.tokens} tokens` : ''}</small>`;
+    act.el.open = false; act = null;
+    return;
+  }
+  if (!act) {
+    $('#view-chat').classList.remove('empty');
+    const el = document.createElement('details');
+    el.className = 'activity'; el.open = true;
+    el.innerHTML = '<summary><span class="shimmer"></span><small class="act-time">0.0s</small></summary><ul></ul>';
+    $('#thread').appendChild(el);
+    act = { el, t0: performance.now(), steps: {} };
+    act.timer = setInterval(() => { const t = act && act.el.querySelector('.act-time'); if (t) t.textContent = ((performance.now() - act.t0) / 1000).toFixed(1) + 's'; }, 100);
+  }
+  act.el.querySelector('.shimmer').textContent = m.text;
+  act.el.querySelectorAll('li.now').forEach((li) => { if (li.dataset.step !== m.step) { li.classList.remove('now'); li.classList.add('ok'); } });
+  let li = act.steps[m.step];
+  if (!li) { li = document.createElement('li'); li.dataset.step = m.step; act.el.querySelector('ul').appendChild(li); act.steps[m.step] = li; }
+  li.className = m.done ? 'ok' : 'now';
+  li.innerHTML = `<i>${STEP_ICON[m.step] || '•'}</i><span>${esc(m.text)}</span>` +
+    (m.items && m.items.length ? `<div class="act-items">${m.items.map((x) => `<em>${esc(String(x).slice(0, 60))}</em>`).join('')}</div>` : '');
+  scrollDown();
+}
+
 function onChat(m) {
+  if (m.type === 'status') { onStatus(m); return; }
   if (m.type === 'tool') { push({ kind: 'tool', text: m.text }); if (!m.text.startsWith('🔎')) setBusy(false); }
   if (m.type === 'reply_start') {
     $('#view-chat').classList.remove('empty');
@@ -675,7 +708,7 @@ async function checkUpdate() {
 
 // ------------------------------------------------------------- account gate (sign up before using Mnemo)
 let account = { signed_in: false, configured: false }, gateMode = 'signup', googleTimer = null;
-const overlayOpen = () => !$('#gate').classList.contains('hidden') || !$('#wizard').classList.contains('hidden');
+const overlayOpen = () => !$('#gate').classList.contains('hidden') || !$('#wizard').classList.contains('hidden') || document.body.classList.contains('touring');
 
 function showGate(on) {
   $('#gate').classList.toggle('hidden', !on);
@@ -733,7 +766,7 @@ function afterSignIn() {
   clearInterval(googleTimer); $('#g-wait').classList.add('hidden');
   showGate(false); renderAccount();
   toast(`Signed in as ${account.email}`);
-  if (!settings.setup_done) openWizard();
+  if (!settings.setup_done) openWizard(); else maybeTour();
 }
 function renderAccount() {
   const el = $('#acct-row');
@@ -825,6 +858,7 @@ $('#w-next').onclick = async () => {
   const nm = $('#w-name').value.trim();
   if (nm) setUI({ name: nm });
   $('#wizard').classList.add('hidden'); requestAnimationFrame(sync);
+  maybeTour();
   const first = document.querySelector('input[name=w-first]:checked').value;
   if (first === 'talk') { await api('POST', '/api/basics', { minutes: 15 }); toast(`${name()} is practicing conversation for 15 minutes.`); }
   if (first === 'library') { showView('learn'); $('#lib-check').click(); }
@@ -841,7 +875,7 @@ async function boot() {
   window.mnemo.keepAwake(!!settings.keep_awake);
   await loadModes();
   renderChat(); loadChatList();
-  if (await checkAccount() && !settings.setup_done) openWizard();
+  if (await checkAccount()) { if (!settings.setup_done) openWizard(); else maybeTour(); }
   setTimeout(checkUpdate, 4000);
 }
 function connect(cfg) {

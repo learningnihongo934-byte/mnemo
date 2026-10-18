@@ -98,6 +98,7 @@ window.fun = {
       push({ kind: 'tool', text: '**Tips & tricks**\n' + TIPS.map(([k, v]) => `**${k}** ${v}`).join('\n') });
       return true;
     }
+    if (t === '/tutorial' || t === '/tour') { startTour(); return true; }
     if (t === 'sudo make me a sandwich') { reply('Okay. 🥪'); return true; }
     if (t === 'make me a sandwich') { reply('What? Make it yourself.'); return true; }
     if (t === '/coffee') { reply('   ( (\n    ) )\n  ........\n  |      |]\n  \\      /\n   `----\'\nOne coffee, brewed by a neural net. Careful, it\'s hot.'); sfx('pop'); return true; }

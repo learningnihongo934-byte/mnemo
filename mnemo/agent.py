@@ -329,34 +329,51 @@ class Agent:
             await send({"type": "reply", "text": "…(I haven't read anything yet, so I can't form words. Open the "
                         "**Learn** tab and download the library, or tell me to *explore*.)", "done": True})
             return
+        st = lambda step, msg, **kw: send({"type": "status", "step": step, "text": msg, **kw})
         s = load_settings()
         mode = s["mode"]
+        md = modes.get(mode)
         mem_text, sources = "", []
-        for url in getattr(self, "files", [])[:5]:  # attached files come first
+        files = getattr(self, "files", [])[:5]
+        if files:
+            await st("files", f"Reading {len(files)} attached file{'s' if len(files) > 1 else ''}")
+        for url in files:  # attached files come first
             for c in memory.chunks_for_url(url, 2):
                 mem_text += f"{c['title']}: {c['text'][:900]}\n\n"
                 sources.append({"title": c["title"], "url": url})
         if s["use_memory"]:
-            hits = memory.search(text, s["memory_snippets"], topic=mode)
+            await st("memory", "Searching memory")
+            hits = await asyncio.to_thread(memory.search, text, s["memory_snippets"], mode)
             if hits:
                 mem_text += "\n\n".join(f"{h['title']}: {h['text'][:700]}" for h in hits)
                 sources += [{"title": h["title"], "url": h["url"]} for h in hits]
+            await st("memory", f"Remembered {len(hits)} thing{'s' if len(hits) != 1 else ''}" if hits else "Nothing relevant in memory",
+                     done=True, items=[h["title"] for h in hits][:5])
         msgs = ([{"role": "system", "content": modes.tag(mode)}] +
                 [m for m in history if m.get("role") in ("user", "assistant")][-30:] + [{"role": "user", "content": text}])
         ids = tokenizer.encode_chat(tok, msgs, mem_text) + [tokenizer.sid(tok, tokenizer.ASSISTANT)]
+        turns = len(msgs) - 1
+        await st("plan", f"Planning a reply in {md['icon']} {md['name']} mode", done=True,
+                 items=[f"{len(ids):,} tokens of context", f"{turns} message{'s' if turns != 1 else ''} of conversation",
+                        f"{self.trainer.model.num_params() / 1e6:.0f}M-parameter brain"])
         stop = {tokenizer.sid(tok, tokenizer.END), tokenizer.sid(tok, tokenizer.EOT), tokenizer.sid(tok, tokenizer.USER)}
         loop = asyncio.get_running_loop()
+        await st("think", "Thinking")
         await send({"type": "reply_start", "sources": sources})
         last = [""]
 
         def on_token(out):
+            if len(out) == 1:
+                asyncio.run_coroutine_threadsafe(st("write", "Writing"), loop)
             full = tok.decode(out)
             delta, last[0] = full[len(last[0]):], full
             if delta:
                 asyncio.run_coroutine_threadsafe(send({"type": "reply_delta", "text": delta}), loop)
 
-        temperature = float(s["temperature"]) or modes.get(mode)["temperature"]
+        temperature = float(s["temperature"]) or md["temperature"]
         await asyncio.to_thread(self._generate_ids, ids, int(s["max_reply_tokens"]), temperature,
                                 stop, on_token)
+        await send({"type": "status", "step": "done", "text": "Done", "tokens": len(tok.encode(last[0]).ids),
+                    "memories": len(sources)})
         await send({"type": "reply", "text": last[0], "done": True, "sources": sources})
         events.emit("chat", text=text)
