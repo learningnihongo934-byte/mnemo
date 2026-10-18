@@ -212,7 +212,7 @@ footer { max-width: 1120px; margin: 0 auto; padding: 50px 28px 60px; border-top:
 .tour-scene > .enter { animation: tin .5s var(--ease); }
 @keyframes tin { from { opacity: 0; transform: scale(.985); } }
 .tour-cap { position: absolute; left: 50%; bottom: 4.2%; transform: translateX(-50%); max-width: 86%; text-align: center; z-index: 5;
-  background: rgba(8,8,8,.82); color: #fff; font: 500 1.05em/1.35 var(--sans); padding: .45em .9em; border-radius: .5em; backdrop-filter: blur(6px); }
+  background: rgba(8,8,8,.82); color: #fff; font: 500 max(12px, 1.05em)/1.35 var(--sans); padding: .45em .9em; border-radius: .5em; backdrop-filter: blur(6px); }
 .tour-cap.show { animation: capin .35s var(--ease); }
 @keyframes capin { from { opacity: 0; transform: translate(-50%, 8px); } }
 .tour-big { position: absolute; inset: 0; margin: auto; width: 4.2em; height: 4.2em; border-radius: 50%; border: 0; z-index: 6; cursor: pointer;
@@ -273,7 +273,7 @@ footer { max-width: 1120px; margin: 0 auto; padding: 50px 28px 60px; border-top:
 .t-page i:nth-child(odd) { --w: 18%; }
 .fly { position: absolute; right: 1em; bottom: calc(1em + var(--i) * 1.7em); background: var(--a); color: #fff; font-size: .85em; padding: .25em .6em; border-radius: .4em; animation: fly .5s var(--ease); }
 @keyframes fly { from { transform: translateX(-40%); opacity: 0; } }
-.t-main.code { display: flex; flex-direction: column; padding: 1em 1.2em; }
+.t-main.tcode { display: flex; flex-direction: column; padding: 1em 1.2em; }
 .t-codebar { display: flex; gap: .8em; align-items: center; margin-bottom: .8em; }
 .t-codebar .chip { border: 1px solid var(--ln); background: var(--sf); border-radius: 9em; padding: .3em .8em; }
 .seg { display: inline-flex; border: 1px solid var(--ln); border-radius: .5em; overflow: hidden; font-size: .9em; } .seg i { font-style: normal; padding: .3em .8em; color: #c8c8d0; } .seg i.on { background: var(--a); color: #fff; }

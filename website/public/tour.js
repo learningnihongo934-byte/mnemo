@@ -89,7 +89,7 @@ const SCENES = [
     sfx: [[1.1, "whoosh"], [2.3, "tick"], [3.4, "tick"], [4.5, "tick"], [5.6, "tick"]] },
 
   { d: 14, cap: ["Mnemo Code: give it a folder and a job.", "It thinks out loud, then proposes a change you can see.", "You approve, deny, or give it full access. Every change can be undone."],
-    html: () => `<div class="t-win">${SIDEBAR("Mnemo Code")}<main class="t-main code"><div class="t-codebar"><span class="chip">📁 my-project</span>
+    html: () => `<div class="t-win">${SIDEBAR("Mnemo Code")}<main class="t-main tcode"><div class="t-codebar"><span class="chip">📁 my-project</span>
       <span class="seg"><i id="pa">Ask</i><i id="pp" class="on">Partial</i><i id="pf">Full access</i></span></div>
       <div class="t-codebody"><div class="t-tree"><div>📁 src</div><div>📝 README.md</div><div id="newf" class="newf">🐍 hello.py</div></div>
       <div class="t-codemain" id="cm"></div></div></main></div>`,
