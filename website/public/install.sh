@@ -42,7 +42,7 @@ main() {
   fi
   if ! need uv; then
     PYV=$(python3 -c 'import sys;print(sys.version_info >= (3,10))' 2>/dev/null || echo False)
-    if [ "$PYV" != True ]; then say "Installing uv (a small Python manager)…"; curl -LsSf https://astral.sh/uv/install.sh | sh </dev/null; export PATH="$HOME/.local/bin:$PATH"; fi
+    if [ "$PYV" != True ]; then say "Installing uv (a small Python manager)…"; curl -LsSf https://astral.sh/uv/install.sh | sh; export PATH="$HOME/.local/bin:$PATH"; fi
   fi
 
   if [ -d "$DIR/.git" ]; then say "Updating existing copy…"; git -C "$DIR" pull --ff-only
