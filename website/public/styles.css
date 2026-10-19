@@ -300,3 +300,5 @@ footer { max-width: 1120px; margin: 0 auto; padding: 50px 28px 60px; border-top:
 .g2 b { background: conic-gradient(from 90deg, #1e3c72, #2a5298, #f7797d, #1e3c72); } .g3 b { background: radial-gradient(circle at 50% 55%, #a48bff 0 18%, #2a2440 19% 60%, #151517 61%); }
 .g4 b { background: linear-gradient(135deg, #0f2027, #2c5364 50%, #f4d03f); } .g5 b { background: radial-gradient(circle at 30% 70%, #ff9a9e, #fad0c4 30%, #a18cd1 70%); }
 @media (max-width: 560px) { .tour-ctrl { font-size: 11px; gap: 8px; } .tour-time { display: none; } }
+.made a { text-decoration: none; }
+.made a:hover b { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
