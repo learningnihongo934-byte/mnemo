@@ -21,7 +21,7 @@ case "$cmd" in
     # Linux: Electron's sandbox helper must be owned by root; if it isn't, run without it rather than crash.
     sb="node_modules/electron/dist/chrome-sandbox"; extra=()
     if [ "$(uname)" = Linux ] && [ -f "$sb" ] && [ "$(stat -c %u "$sb")" != 0 ]; then extra=(--no-sandbox); fi
-    exec npx --no-install electron . "${extra[@]}" ;;
+    exec npx --no-install electron . ${extra[@]+"${extra[@]}"} ;;
   headless|server) cd "$SRC" && echo "Mnemo is learning without the window (Ctrl+C to stop)…" && exec "$PY" -m mnemo.server --port "${1:-8765}" ;;
   config)          cd "$SRC" && exec "$PY" -m mnemo.cli config "$@" ;;
   update)          cd "$SRC" && git pull --ff-only && ./build.sh && echo "Mnemo is up to date." ;;
