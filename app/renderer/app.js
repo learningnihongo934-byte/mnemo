@@ -37,6 +37,9 @@ function md(s) {
   h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
   h = h.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|\s)\*(.+?)\*/g, '$1<i>$2</i>');
   h = h.replace(/(^|\n)&gt; (.*)/g, '$1<blockquote>$2</blockquote>');
+  // [[audio:file.wav]] from plugins such as rat.audio's /speak: play a Studio creation inline.
+  h = h.replace(/\[\[audio:([\w.-]+)\]\]/g, (_, f) =>
+    `<audio class="chat-audio" controls preload="metadata" src="http://127.0.0.1:${cfgG.port}/files/creations/${encodeURIComponent(f)}?token=${cfgG.token}"></audio>`);
   return h;
 }
 const num = (n) => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n ?? 0);

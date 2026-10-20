@@ -119,7 +119,16 @@ def register(mnemo):
         return f"Hello, {arg or 'friend'}!"
 ```
 
-`ctx` gives you `trainer`, `crawler`, `browser`, `memory` and `settings`. Built in: `/wiki`, `/define`, `/calc`, `/time`, `/remember`.
+`ctx` gives you `trainer`, `crawler`, `browser`, `memory` and `settings`. Built in: `/wiki`, `/define`, `/calc`, `/time`,
+`/remember`, and **rat.audio** voices.
+
+`/speak` uses [rat.audio](https://rat-audio.web.app) voices with Kokoro-82M, running on your machine:
+- `/speak Welcome back!` uses the default voice.
+- `/speak rocco-spinelli Howdy, partner.` picks a voice; `/voices` lists them.
+- `/speak [am_puck 60, bm_fable 40, pitch -1] Hello` mixes your own voice.
+
+The audio plays in chat and is saved to Studio → Creations as a WAV. The first use installs `kokoro-onnx` and downloads
+the model (~340 MB).
 
 ## Mnemo Code
 

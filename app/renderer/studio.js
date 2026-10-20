@@ -73,17 +73,18 @@ async function loadCreations() {
     const f = c.files[0];
     const media = c.kind === 'image' ? `<img src="${fileUrl(f)}" alt="" loading="lazy">`
       : c.kind === 'video' ? `<video src="${fileUrl(f)}" muted loop playsinline></video>`
+      : c.kind === 'audio' ? `<div class="audio-card"><span>🔊 ${c.duration ? c.duration.toFixed(1) + 's' : ''}</span><audio src="${fileUrl(f)}" controls preload="metadata"></audio></div>`
       : `<div class="mesh">3D<small>${c.files.map((x) => x.split('.').pop()).join(' · ')}</small></div>`;
     return `<figure data-job="${c.job}">${media}<figcaption><span title="${esc(c.prompt)}">${esc(c.prompt)}</span>
-      <small>${esc(c.model_name)} · seed ${c.seed} · ${c.seconds}s${c.commercial ? '' : ' · non-commercial'}</small>
-      <div class="fig-acts"><button data-show="${esc(f)}">Show file</button><button data-again>Reuse</button><button data-del>Delete</button></div></figcaption></figure>`;
+      <small>${esc(c.model_name)}${c.kind === 'audio' ? '' : ` · seed ${c.seed}`} · ${c.seconds}s${c.commercial ? '' : ' · non-commercial'}</small>
+      <div class="fig-acts"><button data-show="${esc(f)}">Show file</button>${c.kind === 'audio' ? '' : '<button data-again>Reuse</button>'}<button data-del>Delete</button></div></figcaption></figure>`;
   }).join('') : '<p class="muted">Nothing yet. Pick a model, describe something, press Generate.</p>';
   $$('#st-gallery figure').forEach((el) => {
     const c = items.find((x) => x.job === el.dataset.job);
     const v = el.querySelector('video');
     if (v) { el.onmouseenter = () => v.play(); el.onmouseleave = () => v.pause(); }
     el.querySelector('[data-show]').onclick = (e) => window.mnemo.openCreation(e.target.dataset.show);
-    el.querySelector('[data-again]').onclick = () => {
+    if (el.querySelector('[data-again]')) el.querySelector('[data-again]').onclick = () => {
       stKind = c.kind; renderStudio(); $('#st-model').value = c.model; stPick();
       $('#st-prompt').value = c.prompt; $('#st-neg').value = c.negative || ''; $('#st-seed').value = c.seed; $('#view-studio').scrollTop = 0;
     };
