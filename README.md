@@ -2,7 +2,7 @@
 
 # Mnemo
 
-*Made by **Virat Kaukuntla***
+*Made by **Virat Reddy Kaukuntla** ([@learningnihongo934-byte](https://github.com/learningnihongo934-byte))*
 
 **Install** on macOS or Linux (Windows: `irm https://raw.githubusercontent.com/learningnihongo934-byte/mnemo/main/install.ps1 | iex` in PowerShell):
 
