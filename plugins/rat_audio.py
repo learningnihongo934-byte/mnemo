@@ -3,10 +3,11 @@
     /speak Welcome to my channel!                    default voice (Deep Male Narrator)
     /speak rocco-spinelli Howdy, partner.            pick a voice (see /voices)
     /speak [am_puck 60, bm_fable 40, pitch -1] Hi    mix your own voice
+    /speak sakura-japanese 今日はいい天気ですね。       Japanese (kanji, kana, numbers)
 
 Audio plays right in chat and is saved to Studio → Creations as a WAV. The first use installs
-kokoro-onnx and downloads the model (~340 MB) into ~/.mnemo/models/kokoro. Same engine as
-rat-audio.web.app.
+kokoro-onnx and downloads the model (~340 MB) into ~/.mnemo/models/kokoro; the first Japanese text
+also installs misaki[ja] + unidic-lite. Same engine as rat-audio.web.app.
 """
 from __future__ import annotations
 
@@ -41,26 +42,53 @@ PRESETS = {
     "rocco-spinelli": ("Rocco Spinelli", [("am_puck", 55), ("am_fenrir", 30), ("bm_fable", 15)], 1.08, 1.0),
     "british-storyteller": ("British Storyteller", [("bm_george", 75), ("bm_fable", 25)], 0.97, 0.0),
     "calm-female-guide": ("Calm Female Guide", [("bf_emma", 100)], 0.98, 0.0),
+    "sakura-japanese": ("Sakura (日本語)", [("jf_alpha", 100)], 1.0, 0.0),
+    "kumo-japanese": ("Kumo (日本語)", [("jm_kumo", 100)], 1.0, 0.0),
+    "storybook-japanese": ("Storybook (日本語)", [("jf_gongitsune", 100)], 0.95, 0.0),
 }
+JAPANESE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff66-\uff9f]")
 DEFAULT = "deep-male-narrator"
 
 _engine = None
+_ja = None
 _lock = threading.Lock()
 
 
 # ---------------------------------------------------------------- setup (first use only)
+def _pip(*packages):
+    uv = shutil.which("uv")
+    cmd = [uv, "pip", "install", "--python", sys.executable, *packages] if uv else [sys.executable, "-m", "pip", "install", *packages]
+    events.log("plugins", f"rat.audio: installing {' '.join(packages)}…")
+    if subprocess.run(cmd, capture_output=True, text=True).returncode != 0:
+        raise RuntimeError(f"couldn't install {' '.join(packages)}. Try: pip install {' '.join(packages)}")
+    importlib.invalidate_caches()
+
+
 def _ensure_package():
     try:
         return importlib.import_module("kokoro_onnx")
     except ImportError:
-        pass
-    uv = shutil.which("uv")
-    cmd = [uv, "pip", "install", "--python", sys.executable, "kokoro-onnx"] if uv else [sys.executable, "-m", "pip", "install", "kokoro-onnx"]
-    events.log("plugins", "rat.audio: installing kokoro-onnx…")
-    if subprocess.run(cmd, capture_output=True, text=True).returncode != 0:
-        raise RuntimeError("couldn't install kokoro-onnx. Try: pip install kokoro-onnx")
-    importlib.invalidate_caches()
+        _pip("kokoro-onnx")
     return importlib.import_module("kokoro_onnx")
+
+
+def ja_phonemes(text: str) -> str:
+    """Japanese → Kokoro phonemes with misaki (what Kokoro's Japanese voices were trained on)."""
+    global _ja
+    if _ja is None:
+        try:
+            import fugashi, unidic_lite  # noqa: E401
+            from misaki import cutlet, ja
+        except ImportError:
+            _pip("misaki[ja]", "unidic-lite")
+            import fugashi, unidic_lite  # noqa: E401
+            from misaki import cutlet, ja
+        # Pin the bundled unidic-lite; misaki otherwise picks full unidic, whose dictionary isn't downloaded.
+        lite = f'-d "{unidic_lite.DICDIR}" -r "{unidic_lite.DICDIR}/mecabrc"'
+        cutlet.Tagger = lambda *a, **k: fugashi.Tagger(lite)
+        _ja = ja.JAG2P()
+    out = _ja(text)
+    return (out[0] if isinstance(out, tuple) else out).strip()
 
 
 def _ensure_models():
@@ -96,7 +124,7 @@ _PAUSE = {"clause": 0.12, "sentence": 0.32, "paragraph": 0.65, "end": 0.0}
 
 def _sentences(par: str) -> list[str]:
     out, start = [], 0
-    for m in re.finditer(r'([.!?…]+["\'”’)\]]*)\s+', par):
+    for m in re.finditer(r'([.!?…。！？]+["\'”’)\]」』]*)\s+', par):
         cand = par[start:m.end()].strip()
         last = cand.rstrip('.!?…"\'”’)] ').split(" ")[-1].lower()
         if m.group(1).startswith(".") and (last in _ABBR or len(last) == 1):
@@ -109,14 +137,19 @@ def _sentences(par: str) -> list[str]:
 
 
 def segments(text: str, target: int = 240, limit: int = 360) -> list[tuple[str, str]]:
-    text = re.sub(r"[ \t ]+", " ", text.replace("\r", "")).strip()
+    # Japanese has no spaces after 。！？、; add them for the splitter. Its phonemes run ~3x longer, so cut shorter.
+    text = re.sub(r"([。！？」』])(?=[^\s」』])", r"\1 ", text)
+    text = re.sub(r"([、，])(?=\S)", r"\1 ", text)
+    if JAPANESE.search(text):
+        target, limit = 70, 110
+    text = re.sub(r"[ \t\u00a0]+", " ", text.replace("\r", "")).strip()
     paragraphs = [p.strip().replace("\n", " ") for p in re.split(r"\n\s*\n", text) if p.strip()]
     out: list[tuple[str, str]] = []
     for pi, par in enumerate(paragraphs):
         buf = ""
         for s in _sentences(par):
             while len(s) > limit:  # very long sentence: cut at a comma or space
-                cut = max(s.rfind(", ", 0, limit), s.rfind(" ", 0, limit))
+                cut = max(s.rfind(", ", 0, limit), s.rfind("、 ", 0, limit), s.rfind(" ", 0, limit))
                 cut = cut if cut > limit // 3 else limit
                 if buf:
                     out.append((buf, "sentence"))
@@ -160,9 +193,16 @@ def render(text: str, blend: list[tuple[str, float]], pace: float, pitch: float)
     lead = max(blend, key=lambda b: b[1])[0]
     ratio = 2 ** (max(-8.0, min(8.0, pitch)) / 12)
     speed = max(0.5, min(2.0, pace / ratio))
+    # English voices can't read Japanese (and vice versa): swap in Kokoro's voice of the same gender.
+    ja_style = style if lead[0] == "j" else k.get_voice_style("jf_alpha" if lead[1] == "f" else "jm_kumo")
+    en_style = style if lead[0] != "j" else k.get_voice_style("af_heart" if lead[1] == "f" else "am_michael")
+    en_lang = "en-gb" if lead.startswith("b") else "en-us"
     parts = []
     for seg, boundary in segments(text):
-        samples, _ = k.create(seg, voice=style, speed=speed, lang="en-gb" if lead.startswith("b") else "en-us")
+        if JAPANESE.search(seg):
+            samples, _ = k.create(ja_phonemes(seg), voice=ja_style, speed=speed, is_phonemes=True)
+        else:
+            samples, _ = k.create(seg, voice=en_style, speed=speed, lang=en_lang)
         if abs(ratio - 1) > 1e-3:  # pitch shift that keeps duration
             samples = np.interp(np.arange(0, len(samples) - 1, ratio), np.arange(len(samples)), samples).astype(np.float32)
         parts.append(_finish(samples, boundary).tobytes())
@@ -247,5 +287,6 @@ def register(mnemo):
         lines = ["**rat.audio voices** (use as `/speak <voice> text`):"]
         lines += [f"`{vid}` · {name}" for vid, (name, *_rest) in PRESETS.items()]
         lines.append("Mix your own: `/speak [am_puck 60, bm_fable 40, pitch -1] text`. Base voices: af_heart, af_bella, "
-                     "af_nicole, af_sarah, am_michael, am_fenrir, am_puck, am_onyx, bf_emma, bf_isabella, bm_george, bm_fable, and more.")
+                     "af_nicole, af_sarah, am_michael, am_fenrir, am_puck, am_onyx, bf_emma, bf_isabella, bm_george, bm_fable, and more. "
+                     "日本語: jf_alpha, jf_gongitsune, jf_nezumi, jf_tebukuro, jm_kumo.")
         return "\n".join(lines)
